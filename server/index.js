@@ -11,4 +11,8 @@ seedSQL.init();
 const app = express();
 app.get('/', (req, res) => res.send('Welcome to the home inventory service'));
 
-app.listen(process.env.PORT, () => console.log(`Express server is listening on port ${process.env.PORT}`));
+if (module.parent) {
+  module.exports = app; // this is for test suite
+} else {
+  app.listen(process.env.PORT, () => console.log(`Express server is listening on port ${process.env.PORT}`));
+}
