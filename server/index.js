@@ -1,8 +1,8 @@
 require('dotenv').config();
 const createSQL = require('../database/createSQL');
 const seedSQL = require('../database/seedSQL');
+// const sqs = require('./setupSQS');
 
-// require('../database/seedSQL');
 const express = require('express');
 
 createSQL.init();
