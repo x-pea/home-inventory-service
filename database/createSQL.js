@@ -1,11 +1,11 @@
-const mysql = require('mysql');
-const Promise = require('bluebird');
+import * as mysql from 'mysql';
+import { Promise } from 'bluebird';
+import {} from 'dotenv/config';
 // const seedSQL = require('./seedSQL');
-require('dotenv').config();
 Promise.promisifyAll(require('mysql/lib/Connection').prototype);
 // Promise.promisifyAll(require('mysql/lib/Pool').prototype);
 
-let connection;
+let connection; // eslint-disable-line
 
 if (process.env.LOCAL) {
   connection = mysql.createConnection({
@@ -64,5 +64,4 @@ const init = () => (connection.pingAsync()
     'FOREIGN KEY (homes_id) REFERENCES homes(id))'))
 );
 
-module.exports.init = init;
-module.exports.connection = connection;
+export { init, connection };
