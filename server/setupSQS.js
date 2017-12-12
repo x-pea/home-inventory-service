@@ -1,8 +1,8 @@
-const Promise = require('bluebird');
-require('dotenv').config();
-// Load the AWS SDK for Node.js
-const AWS = require('aws-sdk');
+import { Promise } from 'bluebird';
+import { config } from 'dotenv';
+import AWS from 'aws-sdk';
 
+config();
 AWS.config = new AWS.Config();
 AWS.config.update({
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
@@ -14,7 +14,8 @@ AWS.config.update({
 const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 // Promisify and export message methods
-module.exports.sqs = sqs;
-module.exports.sqs.sendMessage = Promise.promisify(sqs.sendMessage);
-module.exports.sqs.receiveMessage = Promise.promisify(sqs.receiveMessage);
-module.exports.sqs.deleteMessage = Promise.promisify(sqs.deleteMessage);
+sqs.sendMessage = Promise.promisify(sqs.sendMessage);
+sqs.receiveMessage = Promise.promisify(sqs.receiveMessage);
+sqs.deleteMessage = Promise.promisify(sqs.deleteMessage);
+
+export default sqs;
