@@ -1,12 +1,12 @@
 import {} from 'dotenv/config';
 import express from 'express';
 import * as createSQL from '../database/createSQL';
-import * as seedSQL from '../database/seedSQL';
+import seedSQL from '../database/seedSQL';
 import redis from '../database/redis.js';
 // import redis from 'redis';
 
-createSQL.init();
-seedSQL.init();
+createSQL.init()
+  // .then(() => seedSQL());
 
 const app = express();
 
