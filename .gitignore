@@ -1,3 +1,6 @@
+# Secrets
+.env
+
 # Project specific
 config/development.json
 config/production.json
@@ -27,8 +30,7 @@ coverage
 .grunt
 
 # Compiled Dirs (http://nodejs.org/api/addons.html)
-build/
-dist/
+compiled/
 
 # Dependency directorys
 # Deployed apps should consider commenting these lines out:
