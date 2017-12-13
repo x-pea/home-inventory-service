@@ -34,7 +34,7 @@
   "scripts": {
     "start-redis": "redis-server /usr/local/etc/redis.conf",
     "start-server": "nodemon --exec babel-node -- server/index.js",
-    "start": "npm-run-all --parallel start-redis start-server",
+    "start": "npm-run-all --parallel start-server",
     "test": "mocha --exit --inline-diffs --compilers js:babel-register test/spec.js"
   },
   "engines": {
