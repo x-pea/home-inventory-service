@@ -1,8 +1,17 @@
 import Promise from 'bluebird';
 import redis from 'redis';
+var sys = require('util');
+var exec = require('child_process').exec;
 
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
+
+
+function puts(error, stdout) {
+  sys.puts(stdout);
+}
+
+exec('redis-server /usr/local/etc/redis.conf', puts);
 
 const client = redis.createClient();
 
