@@ -6,9 +6,14 @@
   "dependencies": {
     "aws-sdk": "^2.167.0",
     "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
-    "mysql": "^2.15.0"
+    "faker": "^4.1.0",
+    "mysql": "^2.15.0",
+    "npm-run-all": "^4.1.2",
+    "redis": "^2.8.0",
+    "sqs-consumer": "^3.8.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -21,11 +26,19 @@
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.5.1",
     "mocha": "^4.0.1",
+    "nodemon": "^1.12.6",
     "supertest": "^3.0.0"
   },
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
   "scripts": {
-    "start": "node server/index.js",
-    "test": "mocha --exit --inline-diffs test/spec.js"
+    "start-redis": "redis-server /usr/local/etc/redis.conf",
+    "start-server": "nodemon --exec babel-node -- server/index.js",
+    "start": "npm-run-all --parallel start-server",
+    "test": "mocha --exit --inline-diffs --compilers js:babel-register test/spec.js"
   },
   "engines": {
     "node": "6.11.1",
