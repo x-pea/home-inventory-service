@@ -58,11 +58,11 @@ const init = () => (connection.pingAsync()
     'FOREIGN KEY (id_hosts) REFERENCES hosts(id), ' +
     'FOREIGN KEY (parent_id) REFERENCES homes(id))'))
   // bookings table
-  // .then(() => connection.queryAsync('CREATE TABLE IF NOT EXISTS bookings ' +
-  //   '(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, ' +
-  //   'date DATE NOT NULL, ' +
-  //   'homes_id INT NOT NULL, ' +
-  //   'FOREIGN KEY (homes_id) REFERENCES homes(id))'))
+  .then(() => connection.queryAsync('CREATE TABLE IF NOT EXISTS reservations ' +
+    '(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, ' +
+    'date DATE NOT NULL, ' +
+    'homes_id INT NOT NULL, ' +
+    'FOREIGN KEY (homes_id) REFERENCES homes(id))'))
 );
 
 export { init, connection };
