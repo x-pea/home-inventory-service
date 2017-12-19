@@ -35,6 +35,8 @@
     ]
   },
   "scripts": {
+    "create-mysql": "babel-node -- database/createSQL.js",
+    "seed-mysql": "babel-node -- database/seedSQL.js",
     "start-redis": "redis-server /usr/local/etc/redis.conf",
     "start-server": "nodemon --exec babel-node -- server/index.js",
     "start": "npm-run-all --parallel start-server",
