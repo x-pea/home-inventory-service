@@ -121,7 +121,7 @@ const saveAllFakeHomes = ({ firstCityId, firstHoodId, firstHostId }) => {
     .catch(err => console.log('Error saving homes: ', err.code, err.errno, err.sqlMessage));
 };
 
-// Create the fake rooms (see above for homes)
+// Save all the fake rooms (see above for homes)
 const saveAllFakeRooms = ({ firstHomeId, fakeHomesToMakeRooms }) => {
   const homes = fakeHomesToMakeRooms;
   const fakeRooms = [...homes];
@@ -140,7 +140,7 @@ const saveAllFakeRooms = ({ firstHomeId, fakeHomesToMakeRooms }) => {
     .then(() => Promise.resolve(firstHomeId));
 };
 
-// Create fake reservations (only track booked days for each home)
+// Save all the fake reservations (only track booked days for each home)
 const saveAllFakeReservations = firstHomeId => {
   const fakeReservations = [];
   for (let i = 0; i < fakeReservationsCount; i += 1) {
@@ -168,4 +168,6 @@ connection.pingAsync()
   .then(firstRows => saveAllFakeRooms(firstRows))
   .then(firstHomeId => saveAllFakeReservations(firstHomeId))
   .tap(() => console.log('All fake data has been saved successfully'))
+  .tap(() => connection.destroy())
+  .tap(() => process.exit())
   .catch(err => console.log(err));
