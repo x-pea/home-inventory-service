@@ -1,5 +1,7 @@
 # Secrets
 .env
+Dockerfile
+.yml
 
 # Project specific
 config/development.json
