@@ -33,9 +33,9 @@ connection.pingAsync()
     'id_hosts INT NULL DEFAULT NULL, ' +
     'max_guests TINYINT NOT NULL DEFAULT 1, ' +
     'price_usd SMALLINT NOT NULL DEFAULT 1, ' +
-    'instant_book BIT NOT NULL DEFAULT 0, ' +
-    'entire_home BIT NOT NULL DEFAULT 1, ' +
-    'private BIT NOT NULL DEFAULT 1, ' +
+    'instant_book TINYINT NOT NULL DEFAULT 0, ' +
+    'entire_home TINYINT NOT NULL DEFAULT 1, ' +
+    'private TINYINT NOT NULL DEFAULT 1, ' +
     'parent_id INT NULL DEFAULT NULL, ' +
     'photos MEDIUMTEXT NULL DEFAULT NULL, ' +
     'FOREIGN KEY (id_cities) REFERENCES cities(id), ' +
@@ -49,4 +49,6 @@ connection.pingAsync()
     'homes_id INT NOT NULL, ' +
     'FOREIGN KEY (homes_id) REFERENCES homes(id))'))
   .then(() => console.log('Database has been created successfully'))
+  .tap(() => connection.destroy())
+  .tap(() => process.exit())
   .catch(err => console.log('Error initializing mySQL database: ', err));
