@@ -24,19 +24,20 @@ for (let i = 0; i < fakeHostsCount; i += 1) {
 // Helper functions for creating fake homes and rooms
 const getAddress = () => faker.address.streetAddress();
 const getCityId = firstCityId => Math.floor(firstCityId + (Math.random() * cities.length));
-const getNeighborhood = firstHoodId => (
-  Math.floor(firstHoodId + (Math.random() * neighborhoods.length))
-);
 const getPrice = () => Math.floor(40 + (Math.random() * 150));
+const getNeighborhood = lastHoodId => (
+  Math.floor(lastHoodId + (Math.random() * neighborhoods.length * cities.length))
+);
 
 // Save all the cities to mySQL
 const insertAllCities = () => (
   connection.queryAsync('SELECT id FROM cities ORDER BY id ASC LIMIT 1')
     .then(firstRow => {
-      if (firstRow.id) { return firstRow; }
+      // Skip saving if we already have the cities
+      if (firstRow[0] && firstRow[0].id) { return firstRow[0]; }
       const cityArrs = cities.map(city => [city]);
       return connection.queryAsync('INSERT INTO cities (name) VALUES ?', [cityArrs]);
-    })
+    }) // The return value below is used to keep track of the first city's id
     .then(res => Promise.resolve(res.insertId ? res.insertId : res.id))
     .catch(err => console.log(err))
 );
@@ -45,11 +46,12 @@ const insertAllCities = () => (
 message: '(Records: 387  Duplicates: 0  Warnings: 0', protocol41: true, changedRows: 0 } */
 
 // Save the fake neighborhoods for each city
-const insertAllNeighborhoods = firstCityId => (
-  connection.queryAsync('SELECT id FROM neighborhoods ORDER BY id ASC LIMIT 1')
-    .then(firstRow => {
-      // If there are results, get the first neighborhood id
-      if (firstRow.id) { return firstRow; }
+const insertAllNeighborhoods = firstCityId => {
+  let lastHoodId;
+  return connection.queryAsync('SELECT id FROM neighborhoods ORDER BY id DESC LIMIT 1')
+    .then(lastRow => {
+      // Get the first neighborhood id (or undefined)
+      if (lastRow[0]) { lastHoodId = lastRow[0].id; }
       // If there are no results, save all the neighborhoods
       const hoodsToInsert = [];
       // Build up an array so we can save all in one query
@@ -62,45 +64,46 @@ const insertAllNeighborhoods = firstCityId => (
         '(id_cities, name) VALUES ?', [hoodsToInsert]);
     })
     .then(res => {
-      const firstHoodId = res.insertId ? res.insertId : res.id;
-      return Promise.resolve({ firstCityId, firstHoodId });
+      if (!lastHoodId) { lastHoodId = res.insertId; }
+      return Promise.resolve({ firstCityId, lastHoodId });
     })
-    .catch(err => console.log('Error saving neighborhoods: ', err.code, err.errno, err.sqlMessage))
-);
+    .catch(err => console.log('Error saving neighborhoods: ', err));
+};
 
 // Save all the fake hosts
-const insertAllHosts = ({ firstCityId, firstHoodId }) => (
-  connection.queryAsync('SELECT id FROM hosts ORDER BY id ASC LIMIT 1')
-    .then(firstRow => {
-      // If there are results, get the first host id
-      if (firstRow.id) { return firstRow; }
-      // Else if there are no results, save all the hosts
-      return connection // This will yield a response with an insertId
-        .queryAsync('INSERT INTO hosts (first_name, last_name) VALUES ?', [fakeHosts]);
+const insertAllHosts = ({ firstCityId, lastHoodId }) => {
+  let lastHostId;
+  return connection.queryAsync('SELECT id FROM hosts ORDER BY id DESC LIMIT 1')
+    .then(lastRow => {
+      // Get the first neighborhood id (or undefined)
+      if (lastRow[0]) { lastHostId = lastRow[0].id; }
+      return connection.queryAsync('INSERT INTO hosts ' +
+        '(first_name, last_name) VALUES ?', [fakeHosts]);
     })
     .then(res => {
-      const firstHostId = res.insertId ? res.insertId : res.id;
-      return Promise.resolve({ firstCityId, firstHoodId, firstHostId });
+      if (!lastHostId) { lastHostId = res.insertId; }
+      return Promise.resolve({ firstCityId, lastHoodId, lastHostId });
     })
-    .catch(err => console.log('Error saving hosts: ', err.code, err.errno, err.sqlMessage))
-);
+    .catch(err => console.log('Error saving hosts: ', err));
+};
 
 // Create the fake homes (rooms come later)
-const saveAllFakeHomes = ({ firstCityId, firstHoodId, firstHostId }) => {
+const saveAllFakeHomes = ({ firstCityId, lastHoodId, lastHostId }) => {
+  let lastHomeId;
   const fakeHomesToMakeRooms = [];
-  return connection.queryAsync('SELECT id FROM homes ORDER BY id ASC LIMIT 1')
-    .then(firstRow => {
-      // If there are results, get the first home id
-      if (firstRow.id) { return firstRow; }
+  return connection.queryAsync('SELECT id FROM homes ORDER BY id DESC LIMIT 1')
+    .then(lastRow => {
+      // If there are results, get the first home to use its id
+      if (lastRow[0]) { lastHomeId = lastRow[0].id; }
       // Else if there are no results, save all the hosts
       const fakeHomes = [];
       let fakeHome; // create just a few for now
       for (let i = 0; i < fakeHomesCount; i += 1) {
         fakeHome = [
-          getNeighborhood(firstHoodId), getCityId(firstCityId),
-          getAddress(), Math.floor(Math.random() * 8), getPrice(),
+          getNeighborhood(lastHoodId), getCityId(firstCityId),
+          getAddress(), 1 + Math.floor(Math.random() * 8), getPrice(),
           Math.round(Math.random()), faker.image.nightlife(), 1, 1, null,
-          firstHostId + Math.floor(Math.random() * fakeHosts.length)
+          lastHostId + Math.floor(Math.random() * fakeHosts.length)
         ];
         fakeHomes.push(fakeHome);
         // Save the first ten to use to create single rooms for rent
@@ -113,23 +116,23 @@ const saveAllFakeHomes = ({ firstCityId, firstHoodId, firstHostId }) => {
         'private, parent_id, id_hosts) VALUES ?', [fakeHomes]);
     })
     .then(res => {
-      const firstHomeId = res.insertId ? res.insertId : res.id;
+      if (!lastHomeId) { lastHomeId = res.insertId; }
       return Promise.resolve({
-        firstCityId, firstHoodId, firstHostId, firstHomeId, fakeHomesToMakeRooms
+        firstCityId, lastHoodId, lastHostId, lastHomeId, fakeHomesToMakeRooms
       });
     })
-    .catch(err => console.log('Error saving homes: ', err.code, err.errno, err.sqlMessage));
+    .catch(err => console.log('Error saving homes: ', err));
 };
 
 // Save all the fake rooms (see above for homes)
-const saveAllFakeRooms = ({ firstHomeId, fakeHomesToMakeRooms }) => {
+const saveAllFakeRooms = ({ lastHomeId, fakeHomesToMakeRooms }) => {
   const homes = fakeHomesToMakeRooms;
   const fakeRooms = [...homes];
   for (let i = 0; i < homes.length; i += 1) {
     // Give the room a random private / shared value
     fakeRooms[i][8] = Math.round(Math.random());
     // Give the room a parent id for the home it's part of
-    fakeRooms[i][9] = firstHomeId + i;
+    fakeRooms[i][9] = lastHomeId + i;
     // Give the room a price lower than the entire home
     fakeRooms[i][5] = homes[i][5] * 0.3;
   }
@@ -137,16 +140,16 @@ const saveAllFakeRooms = ({ firstHomeId, fakeHomesToMakeRooms }) => {
     .queryAsync('INSERT INTO homes (id_neighborhoods, id_cities, address, ' +
       'max_guests, price_usd, instant_book, photos, entire_home, ' +
       'private, parent_id, id_hosts) VALUES ?', [fakeRooms])
-    .then(() => Promise.resolve(firstHomeId));
+    .then(() => Promise.resolve(lastHomeId));
 };
 
 // Save all the fake reservations (only track booked days for each home)
-const saveAllFakeReservations = firstHomeId => {
+const saveAllFakeReservations = lastHomeId => {
   const fakeReservations = [];
   for (let i = 0; i < fakeReservationsCount; i += 1) {
     fakeReservations.push([
       faker.date.future(),
-      firstHomeId + Math.floor(Math.random() * fakeReservationsCount)
+      lastHomeId + Math.floor(Math.random() * fakeHomesCount)
     ]);
   }
   return connection.queryAsync('INSERT INTO reservations ' +
@@ -159,14 +162,11 @@ connection.pingAsync()
   // create airbnb database
   .then(() => connection.queryAsync('USE airbnb'))
   .then(() => insertAllCities())
-  .then(firstCityId => insertAllNeighborhoods(firstCityId))
-  // .tap(firstRows => console.log(firstRows))
-  .then(firstRows => insertAllHosts(firstRows))
-  // .tap(firstRows => console.log(firstRows))
-  .then(firstRows => saveAllFakeHomes(firstRows))
-  // .tap(firstRows => console.log(firstRows))
-  .then(firstRows => saveAllFakeRooms(firstRows))
-  .then(firstHomeId => saveAllFakeReservations(firstHomeId))
+  .then(lastCityId => insertAllNeighborhoods(lastCityId))
+  .then(lastRows => insertAllHosts(lastRows))
+  .then(lastRows => saveAllFakeHomes(lastRows))
+  .then(lastRows => saveAllFakeRooms(lastRows))
+  .then(lastHomeId => saveAllFakeReservations(lastHomeId))
   .tap(() => console.log('All fake data has been saved successfully'))
   .tap(() => connection.destroy())
   .tap(() => process.exit())
