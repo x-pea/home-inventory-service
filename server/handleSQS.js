@@ -1,11 +1,7 @@
-import { config } from 'dotenv';
+import {} from 'dotenv/config';
 import { Promise } from 'bluebird';
 import Consumer from 'sqs-consumer';
 import sql from '../database/index';
-import sqs from './setupSQS';
-
-
-config();
 
 
 // Set the long-polling tools on incoming queues
@@ -20,18 +16,6 @@ const queueFromReservations = Consumer.create({
 });
 queueFromReservations.on('sqs-consumer error: ', err => console.log(err.message));
 queueFromReservations.start();
-
-const queueFromClient = Consumer.create({
-  queueUrl: process.env.SQS_QUEUE_URL2,
-  handleMessage: (message, done) => {
-    console.log('Message from queue1: ', message);
-    handleClientMess(message) // eslint-disable-line no-use-before-define
-      .then(() => done());
-  }
-});
-queueFromClient.on('sqs-consumer error: ', err => console.log(err.message));
-queueFromClient.start();
-
 
 /*
 Message from reservations will look like this:
@@ -56,13 +40,26 @@ function handleResMess(message) {
   return Promise.all(datePromises);
 }
 
+
+/* MAY NOT USE CLIENT QUEUE */
+// const queueFromClient = Consumer.create({
+//   queueUrl: process.env.SQS_QUEUE_URL2,
+//   handleMessage: (message, done) => {
+//     console.log('Message from queue1: ', message);
+//     handleClientMess(message) // eslint-disable-line no-use-before-define
+//       .then(() => done());
+//   }
+// });
+// queueFromClient.on('sqs-consumer error: ', err => console.log(err.message));
+// queueFromClient.start();
+
 /*
 Message from client will look like this:
-  { }
+  { id: 23456 }
 */
-function handleClientMess(message) {
-  // interpret message
-  // send response
-  const reply = { message, homes: [] }; // placeholder
-  sqs.sendToClient(reply);
-}
+// function handleClientMess(message) {
+//   // interpret message
+//   // send response
+//   const reply = { message, homes: [] }; // placeholder
+//   sqs.sendToClient(reply);
+// }
