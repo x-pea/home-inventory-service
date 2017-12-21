@@ -1,8 +1,7 @@
 import { Promise } from 'bluebird';
-import { config } from 'dotenv';
+import {} from 'dotenv/config';
 import AWS from 'aws-sdk';
 
-config();
 
 AWS.config = new AWS.Config();
 AWS.config.update({
