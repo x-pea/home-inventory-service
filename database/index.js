@@ -11,4 +11,11 @@ const connection = mysql.createConnection({
   password: process.env.SQL_PASSWORD,
 });
 
+connection.pingAsync()
+  .then(() => (process.env.TEST === 1
+    ? connection.queryAsync('USE airbnb_test')
+    : connection.queryAsync('USE airbnb')))
+  .catch(err => console.log('Problem connecting mySQL\n', err));
+
+
 export default connection;
