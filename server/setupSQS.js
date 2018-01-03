@@ -26,7 +26,7 @@ const reservationSendingParams = {
 
 sqs.sendToReservations = message => {
   const params = Object.assign({}, reservationSendingParams);
-  params.MessageBody = message;
+  params.MessageBody = message || reservationSendingParams.MessageBody;
   return sqs.sendMessage(params)
     .catch(err => console.log('sqs sending-to-reservations error: ', err.message));
 };
@@ -39,7 +39,7 @@ const clientSendingParams = {
 
 sqs.sendToClient = message => {
   const params = Object.assign({}, clientSendingParams);
-  params.MessageBody = message;
+  params.MessageBody = message || reservationSendingParams.MessageBody;
   return sqs.sendMessage(params)
     .catch(err => console.log('sqs sending-to-client error: ', err.message));
 };
