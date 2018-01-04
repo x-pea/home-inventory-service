@@ -270,7 +270,7 @@ describe('** Server / database integration **', function() {
     it('should update a home in the database', function (done) {
       sql.queryAsync('SELECT * FROM airbnb_test.homes ORDER BY id DESC LIMIT 1')
         .then(rows => {
-          const updatedHome = rows[0];
+          const updatedHome = Object.assign({}, rows[0]);
           updatedHome.address = '12345 Update Street';
           testRequest
             .patch('/homes')
