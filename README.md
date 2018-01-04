@@ -1,35 +1,25 @@
-# Project Name
+# Project Name and Description
 
-The project description
+AirBnB-J.E.A.P.
 
-## Roadmap
+This service is an inventory of homes for a back-end recreation
+of AirBnB. The service accepts posts and updates of homes from
+owners, and communicates with a reservations service and with a
+client-facing service. The broader app: https://github.com/x-pea
 
-View the project roadmap [here](LINK_TO_DOC)
+# Requirements
 
-## Contributing
+- Node 6.11.1
+- mySQL 5.7
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+# Development
 
-# Table of Contents
+a. Install all dependencies with npm install
+b. In .env file, add mySQL connection details, port, and SQS urls
+c. Start mySQL server and run createSQL and seedSQL
+d. Run npm start
+e. Test with npm test
 
-1. [Usage](#Usage)
-1. [Requirements](#requirements)
-1. [Development](#development)
-    1. [Installing Dependencies](#installing-dependencies)
-    1. [Tasks](#tasks)
+# Other Information
 
-## Usage
-
-> Some usage instructions
-
-## Requirements
-
-- Node 6.9.x
-- Redis 3.2.x
-- Postgresql 9.6.x
-- etc
-
-## Other Information
-
-(TODO: fill this out with details about your project. Suggested ideas: architecture diagram, schema, and any other details from your app plan that sound interesting.)
-
+- This project uses the AirBnB style guide with slight modifications
