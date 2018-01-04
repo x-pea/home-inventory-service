@@ -36,7 +36,11 @@ app.get('/homes?:id', (req, res) => (
       }
       // If not, query mySQL
       // Note, this object syntax isn't supported for batch inserting!
-      return sql.queryAsync('SELECT * FROM homes WHERE id = ?', [req.query.id])
+      return sql.queryAsync('SELECT homes.id, cities.name AS city, neighborhoods.name AS neighborhood, ' +
+        'max_guests, price_usd, instant_book, entire_home, private, parent_id, photos ' +
+        'FROM ((homes INNER JOIN cities ON homes.id_cities = cities.id) ' +
+        'INNER JOIN neighborhoods on homes.id_neighborhoods = neighborhoods.id) ' +
+        'WHERE homes.id = ?', [req.query.id])
         .then(rows => {
           // Add data (if any) to Redis
           if (rows[0]) { redisDB.setAsync(req.query.id, JSON.stringify(rows[0])); }
@@ -81,7 +85,7 @@ app.patch('/homes', (req, res) => (
         redisDB.set(req.body.id, home),
         // Notify other service of update
         sqs.sendToClient(home),
-        sqs.sendToReservations(home)
+        sqs.sendToReservations(home),
       ]);
     })
     .catch(err => res.status(500).send(err))
